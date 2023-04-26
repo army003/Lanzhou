@@ -8,7 +8,7 @@ import { useState } from 'react';
 function App() {
   const [count, setCount] = useState(0);
 
-  return <div tw='w-[50px] h-[50px] bg-secondary'></div>;
+  return <div></div>;
 }
 
 export default App;
