@@ -1,0 +1,93 @@
+stages:
+  - build
+  - test
+  - deploy
+  - release
+
+variables:
+  DOCKER_BUILDKIT: 1
+  LATEST_IMAGE: $CI_REGISTRY_IMAGE/$CI_BUILD_REF_SLUG:latest
+  IMAGE: $CI_REGISTRY_IMAGE/$CI_BUILD_REF_SLUG
+  TAG: $CI_BUILD_REF_SLUG-$CI_PIPELINE_ID-$CI_COMMIT_SHORT_SHA
+
+.notification_template: &notification_template
+  image: python:3.10-alpine
+  stage: notification
+  tags:
+    - docker
+  before_script:
+    - pip install apprise
+
+docker-image:
+  stage: build
+  image: docker:20.10
+  tags:
+    - docker
+  only: ['dev', 'preprod', 'main']
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE:$TAG .
+    - docker tag $IMAGE:$TAG $LATEST_IMAGE
+    - docker push $IMAGE
+    - docker push $IMAGE:$TAG
+  after_script:
+    - docker rmi $IMAGE
+    - docker rmi $IMAGE:$TAG
+
+k8s-deploy-dev:
+  image: gitlab.globerce.com:5050/docker-images/helmsman:3.6.2
+  stage: deploy
+  tags:
+    - docker
+  only: ['dev']
+  script:
+    - sed -i "s@IMAGE_TO_REPLACE:TAG@$IMAGE:$TAG@g" manifest-dev.yml
+    - mkdir -p ~/.kube
+    - echo ${KUBECONFIG_DEV} | base64 -d > ~/.kube/config
+    - helm repo update
+    - helmsman -keep-untracked-releases -update-deps -apply -f manifest-dev.yml
+
+k8s-deploy-preprod:
+  image: gitlab.globerce.com:5050/docker-images/helmsman:3.6.2
+  stage: deploy
+  tags:
+    - ipoteka
+  only: ['preprod']
+  script:
+    - sed -i "s@IMAGE_TO_REPLACE:TAG@$IMAGE:$TAG@g" manifest-preprod.yml
+    - mkdir -p ~/.kube
+    - echo ${KUBECONFIG_PREPROD} | base64 -d > ~/.kube/config
+    - helm repo update
+    - helmsman -keep-untracked-releases -update-deps -apply -f manifest-preprod.yml
+
+k8s-deploy-prod:
+  image: gitlab.globerce.com:5050/docker-images/helmsman:3.6.2
+  stage: deploy
+  tags:
+    - ipoteka
+  only: ['main']
+  when: manual
+  script:
+    - sed -i "s@IMAGE_TO_REPLACE:TAG@$IMAGE:$TAG@g" manifest-prod.yml
+    - mkdir -p ~/.kube
+    - echo ${KUBECONFIG_PROD} | base64 -d > ~/.kube/config
+    - helm repo update
+    - helmsman -keep-untracked-releases -update-deps -apply -f manifest-prod.yml
+
+release-prod:
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  stage: release
+  tags:
+    - docker
+  only: ['main']
+  needs: ['k8s-deploy-prod']
+  before_script:
+    - apk --no-cache add git
+  script:
+    - git rev-list --no-commit-header --format=format:"- %as | %an | %s" --no-merges $(git describe --tags --abbrev=0)..HEAD | uniq > CHANGELOG.md
+  release:
+    tag_name: 'v0.$CI_PIPELINE_IID'
+    description: 'CHANGELOG.md'
+    ref: '$CI_COMMIT_SHA'
+  when: on_success

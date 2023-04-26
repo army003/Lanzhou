@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer component {
+  .outline-green {
+    outline: 1px solid var(--green-primary);
+  }
+
+  .gradient-auto-front {
+    background: radial-gradient(53.73% 53.73% at 50.13% 57.14%, rgba(40, 40, 40, 0) 34.37%, var(--bg-secondary) 100%);
+  }
+}
+html {
+  @apply h-full;
+}
+
+body,
+#root {
+  @apply h-max;
+}
+
+@media screen and (max-width: 340px) {
+  body {
+    width: 340px;
+  }
+}
