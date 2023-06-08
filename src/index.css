@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer component {
+/* @layer component {
   .outline-green {
     outline: 1px solid var(--green-primary);
   }
@@ -25,3 +25,11 @@ body,
     width: 340px;
   }
 }
+
+input:focus {
+  border: 0px;
+}
+
+input:active {
+  border: 0px;
+} */

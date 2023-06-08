@@ -6,46 +6,6 @@ function pathResolve(dir) {
   return resolve(__dirname, '.', dir);
 }
 
-// sentryVitePlugin({
-//   url: 'https://sentry.globerce.com/',
-//   org: 'sentry',
-//   project: 'non_resident_front',
-
-//   // Specify the directory containing build artifacts
-//   include: './dist',
-
-//   // Auth tokens can be obtained from https://sentry.io/settings/account/api/auth-tokens/
-//   // and needs the `project:releases` and `org:read` scopes
-//   authToken: 'eb7418f1f7ab422985012e78c229fe0f2dbceec29c904d84aa467ee13949e1bd',
-
-//   // Optionally uncomment the line below to override automatic release name detection
-//   // release: process.env.SENTRY_RELEASE,
-//   sourceMaps: {
-//     include: ['./dist/assets'],
-//     ignore: ['node_modules'],
-//     urlPrefix: '~/assets'
-//   }
-// })
-
-const sentryConfig = {
-  url: 'https://sentry.globerce.com/',
-  authToken: 'eb7418f1f7ab422985012e78c229fe0f2dbceec29c904d84aa467ee13949e1bd',
-  org: 'sentry',
-  project: 'non_resident_front',
-  release: 'non_resident_front_dev',
-  deploy: {
-    env: 'development'
-  },
-  setCommits: {
-    auto: true
-  },
-  sourceMaps: {
-    include: ['./dist/assets'],
-    ignore: ['node_modules'],
-    urlPrefix: '~/assets'
-  }
-};
-
 // https://vitejs.dev/config/
 export default defineConfig(userConfig => {
   process.env = { ...process.env, ...loadEnv(userConfig.mode, process.cwd()) };
@@ -62,7 +22,7 @@ export default defineConfig(userConfig => {
       jsxFactory: 'jsx',
       jsxInject: '/** @jsx jsx */ import { jsx } from "@emotion/react"'
     },
-    envPrefix: 'AC',
+    envPrefix: 'LZ',
     sourcemap: true,
     server: {
       https: false,
