@@ -1,9 +1,11 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/dist/query';
-import { persistReducer } from 'redux-persist';
-import { persistStore } from 'redux-persist';
+import { setupListeners } from '@reduxjs/toolkit/query/react';
+import { PERSIST, persistReducer, persistStore, PURGE, REGISTER } from 'redux-persist';
+import sessionStorage from 'redux-persist/lib/storage/session';
 
-import { api } from '../api';
+import { api } from '@/app/api';
+
+import { notificationMiddleware } from '../middleware/notification';
 
 const persistConfig = {
   key: 'root',
@@ -21,8 +23,16 @@ export const rootReducer = () => {
 const persistedReducer = persistReducer(persistConfig, rootReducer());
 
 export const store = configureStore({
-  reducer: persistedReducer
+  reducer: persistedReducer,
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [REGISTER, PERSIST, PURGE]
+      }
+    }).concat(api.middleware, notificationMiddleware),
+  devTools: import.meta.env.DEV
 });
 
 setupListeners(store.dispatch);
+
 export const persistor = persistStore(store);

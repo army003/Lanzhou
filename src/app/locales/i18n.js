@@ -3,7 +3,7 @@ import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
-import { kz } from './kz/kz';
+import { kk } from './kz/kz';
 import { ru } from './ru/ru';
 
 i18next
@@ -15,8 +15,8 @@ i18next
       ru: {
         translation: ru
       },
-      kz: {
-        translation: kz
+      kk: {
+        translation: kk
       }
     }
   });

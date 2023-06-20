@@ -1,1 +1,1 @@
-export const ru = {};
+export const ru = { heading: 'ru heading' };

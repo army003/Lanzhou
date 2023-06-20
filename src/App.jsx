@@ -3,13 +3,13 @@ import 'twin.macro';
 import 'twin.macro';
 
 import React from 'react';
-import { useForm } from 'react-hook-form';
+
+import Layout from './views/layout';
 
 function App() {
-  const { control } = useForm({});
   return (
     <div>
-      <h1 tw='text-warning bg-primary'>Hello</h1>
+      <Layout />
     </div>
   );
 }
